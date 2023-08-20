@@ -1,6 +1,10 @@
-# Turborepo starter
+# 42 transendance
 
-This is an official starter Turborepo.
+A ping Pong Game built with latest hotest and most hyped technologies
+
+## About Nest
+
+I know it sucks but we have to do it. I guess some parts will be pure express
 
 ## What's inside?
 
@@ -8,9 +12,9 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `backend`: nestJs backend
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
+- `backend`: ugly [nestJS] backend
+- `web`: another beautiful [Next.js] app
+- `ui`: a stub React component library shared by both `web` application
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 
