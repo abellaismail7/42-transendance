@@ -6,7 +6,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "/apps/web/*",
+      "src": "/apps/web/.next/server/pages/**/*",
       "use": "@now/static"
     }
   ],
