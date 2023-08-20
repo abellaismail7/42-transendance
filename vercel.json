@@ -1,3 +1,12 @@
 {
-  "routes": [{ "src": "/api/v1/", "dest": "/apps/backend/dist/main.js" }]
+  "rewrites": [
+    {
+      "source": "./*",
+      "destination": "/apps/web/.next/server/pages"
+    },
+    {
+      "source": "/api/v1*",
+      "destination": "/apps/backend/dist/main.js"
+    }
+  ]
 }
