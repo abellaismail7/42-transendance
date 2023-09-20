@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String           @id @unique @default(uuid())
+  username         String
+  login            String           @unique
+  state            UserState        @default(OFFLINE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  ownedChannels    Channel[]
+  channels         ChannelMember[]
+  channelsMessages ChannelMessage[]
+}
+
+model Channel {
+  id        String           @id @unique @default(uuid())
+  name      String
+  ownerId   String
+  access    ChannelAccess
+  password  String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  owner     User             @relation(fields: [ownerId], references: [id])
+  members   ChannelMember[]
+  messages  ChannelMessage[]
+}
+
+model ChannelMember {
+  id           String     @id @unique @default(uuid())
+  userId       String
+  channelId    String
+  isAdmin      Boolean
+  isBanned     Boolean    @default(false)
+  isMuted      Boolean    @default(false)
+  joinStatus   JoinStatus
+  muteDuration Int?
+  channel      Channel    @relation(fields: [channelId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+model ChannelMessage {
+  id        String   @id @unique @default(uuid())
+  senderId  String
+  channelId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
+}
+
+enum JoinStatus {
+  WAIT_FOR_APPROVAL
+  JOINED
+}
+
+enum ChannelAccess {
+  PROTECTED
+  PRIVATE
+  PUBLIC
+}
+
+enum UserState {
+  DO_NOT_DISTURB
+  IN_MATCH
+  OFFLINE
+  ONLINE
+}
