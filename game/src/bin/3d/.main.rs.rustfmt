@@ -1,0 +1,193 @@
+//! This example demonstrates Bevy's immediate mode drawing API intended for visual debugging.
+
+use bevy::{
+    prelude::*,
+    sprite::collide_aabb::{collide, Collision},
+};
+use components::{collider::CollisionEvent, scoreboard::Scoreboard, paddle::PaddleSide};
+
+mod setup;
+
+const BALL_SPEED: f32 = 5.;
+const INITIAL_BALL_DIRECTION: Vec2 = Vec2::new(-0.2, -0.5);
+const BALL_SIZE: Vec3 = Vec3::new(0.1, 0.1, 0.1);
+const PADDLE_SPEED: f32 = 4.0;
+
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_systems(Startup, setup::setup)
+        .insert_resource(FixedTime::new_from_secs(1.0 / 60.0))
+        .add_event::<CollisionEvent>()
+        .insert_resource(Scoreboard {
+            left: 0,
+            right: 0,
+            turn: components::paddle::PaddleSide::Right,
+            start: false,
+        })
+        //.add_systems(Update, ( rotate_camera, update_config))
+        .add_systems(Update, update_config)
+        .add_systems(Update, start_game)
+        .add_systems(
+            FixedUpdate,
+            (
+                check_for_collisions,
+                apply_velocity.before(check_for_collisions),
+                move_paddle,
+            )
+            .run_if(game_starts),
+        )
+        .run();
+}
+
+
+
+
+/* fn system(mut gizmos: Gizmos, time: Res<Time>) {
+    gizmos.cuboid(
+        Transform::from_translation(Vec3::Y * 1.0).with_scale(Vec3::splat(1.)),
+        Color::BLACK,
+    );
+}
+*/
+fn rotate_camera(mut query: Query<&mut Transform, With<Camera>>, time: Res<Time>) {
+    let mut transform = query.single_mut();
+
+    transform.rotate_around(Vec3::ZERO, Quat::from_rotation_y(time.delta_seconds() / 2.));
+}
+
+
+fn game_starts(score: Res<Scoreboard>) -> bool {
+    score.start
+}
+
+
+fn start_game(keyboard_input: Res<Input<KeyCode>>, mut scoreboard: ResMut<Scoreboard>) {
+    if keyboard_input.just_pressed(KeyCode::Space) && !scoreboard.start {
+        scoreboard.start = true;
+    }
+}
+
+
+fn move_paddle(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&Paddle, &mut Transform), With<Paddle>>,
+    time_step: Res<FixedTime>,
+) {
+    //let paddle_transform = query.iter_mut().find(|it| it.0.side.is(a));
+    let paddles = query.iter_mut();
+
+    paddles.for_each(|paddle_transform|{
+
+
+    if let Some((_, mut paddle_transform)) = Some(paddle_transform) {
+        let mut direction = 0.0;
+
+        if keyboard_input.pressed(KeyCode::Left) {
+            direction -= 1.0;
+        }
+
+        if keyboard_input.pressed(KeyCode::Right) {
+            direction += 1.0;
+        }
+
+        // Calculate the new horizontal paddle position based on player input
+        let new_paddle_position = paddle_transform.translation.x
+            + direction * PADDLE_SPEED * time_step.period.as_secs_f32();
+
+        // Update the paddle position,
+        // making sure it doesn't cause the paddle to leave the arena
+        /* let up_bound = -TOP_WALL + WALL_THICKNESS / 2.0 + PADDLE_SIZE.y / 2.0 + PADDLE_PADDING;
+        let down_bound = -BOTTOM_WALL - WALL_THICKNESS / 2.0 - PADDLE_SIZE.y / 2.0 - PADDLE_PADDING; */
+        let up_bound = -2.0;
+        let down_bound = 2.0;
+
+        paddle_transform.translation.x = new_paddle_position.clamp(up_bound, down_bound);
+    }
+  })
+}
+
+fn update_config(mut config: ResMut<GizmoConfig>, keyboard: Res<Input<KeyCode>>, time: Res<Time>) {
+    if keyboard.just_pressed(KeyCode::D) {
+        config.depth_bias = if config.depth_bias == 0. { -1. } else { 0. };
+    }
+    if keyboard.just_pressed(KeyCode::P) {
+        // Toggle line_perspective
+        config.line_perspective ^= true;
+        // Increase the line width when line_perspective is on
+        config.line_width *= if config.line_perspective { 5. } else { 1. / 5. };
+    }
+}
+
+fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<FixedTime>) {
+    for (mut transform, velocity) in &mut query {
+        transform.translation.x += velocity.x * time_step.period.as_secs_f32();
+        transform.translation.y += velocity.y * time_step.period.as_secs_f32();
+    }
+}
+
+fn check_for_collisions(
+    mut scoreboard: ResMut<Scoreboard>,
+    mut ball_set: Query<(&mut Velocity, &mut Transform), With<Ball>>,
+    collider_query: Query<(&Collider, &Transform), Without<Ball>>,
+    mut collision_events: EventWriter<CollisionEvent>,
+) {
+    let (mut ball_velocity, mut ball_transform) = ball_set.single_mut();
+    let ball_size = ball_transform.scale.truncate();
+
+    // check collision with walls
+    for (collider_entity, transform) in &collider_query {
+        let collision = collide(
+            ball_transform.translation,
+            ball_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+        if let Some(collision) = collision {
+            // Sends a collision event so that other systems can react to the collision
+            collision_events.send_default();
+
+            // reflect the ball when it collides
+            let mut reflect_x = false;
+            let mut reflect_y = false;
+
+            // only reflect if the ball's velocity is going in the opposite direction of the
+            // collision
+            match collision {
+                Collision::Left => {
+                    reflect_x = ball_velocity.x > 0.0;
+                    if collider_entity.scorable {
+                        scoreboard.left += 1;
+                        scoreboard.start = false;
+                        ball_transform.translation.x = 0.0;
+                        ball_transform.translation.y = 0.0;
+                    }
+                    scoreboard.turn.switch();
+                }
+                Collision::Right => {
+                    reflect_x = ball_velocity.x < 0.0;
+                    if collider_entity.scorable {
+                        scoreboard.right += 1;
+                        scoreboard.start = false;
+                        ball_transform.translation.x = 0.0;
+                        ball_transform.translation.y = 0.0;
+                    }
+                    scoreboard.turn.switch();
+                }
+                Collision::Top => reflect_y = ball_velocity.y < 0.0,
+                Collision::Bottom => reflect_y = ball_velocity.y > 0.0,
+                Collision::Inside => { }
+            }
+
+            // reflect velocity on the x-axis if we hit something on the x-axis
+            if reflect_x {
+                ball_velocity.x = -ball_velocity.x;
+            }
+
+            // reflect velocity on the y-axis if we hit something on the y-axis
+            if reflect_y {
+                ball_velocity.y = -ball_velocity.y;
+            }
+        }
+    }
+}

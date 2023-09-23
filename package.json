@@ -5,7 +5,8 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "turbo": "turbo",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "game": "cd game && cargo run --bin 3d"
   },
   "devDependencies": {
     "@turbo/gen": "^1.9.7",
