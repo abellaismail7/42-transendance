@@ -1,18 +1,13 @@
-use bevy::{
-    /* prelude::{
-        App, DefaultPlugins, EventWriter, FixedTime, KeyCode,
-        Query, Res, ResMut,
-        Transform, Vec3, With, Without, Input, Time, Quat, Startup, FixedUpdate, Update, Camera, GizmoConfig
-    }, */
-    prelude::*,
-};
-use components::{
-    collider::CollisionEvent,
-    config::Config,
-    scoreboard::Scoreboard,
-};
+use bevy::prelude::*;
+use components::{collider::CollisionEvent, config::Config, scoreboard::Scoreboard};
 use init::setup::setup;
-use systems::{start::{start_game, game_starts}, collisions::check_for_collisions, config::update_config, move_paddle::move_paddle, ball_velocity::apply_velocity};
+use systems::{
+    ball_velocity::apply_velocity,
+    collisions::check_for_collisions,
+    config::update_config,
+    move_paddle::move_paddle,
+    start::{game_starts, start_game},
+};
 
 mod components;
 mod init;

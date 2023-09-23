@@ -2,7 +2,6 @@
 use bevy::prelude::Component;
 
 impl PaddleSide {
-
     pub fn switch(&mut self) {
         *self = match self {
             PaddleSide::Left => PaddleSide::Right,

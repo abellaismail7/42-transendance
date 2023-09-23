@@ -1,7 +1,4 @@
-use bevy::prelude::{
-    Query,With, Time, Camera, Transform, Res, Vec3, Quat
-};
-
+use bevy::prelude::{Camera, Quat, Query, Res, Time, Transform, Vec3, With};
 
 /* fn system(mut gizmos: Gizmos, time: Res<Time>) {
     gizmos.cuboid(

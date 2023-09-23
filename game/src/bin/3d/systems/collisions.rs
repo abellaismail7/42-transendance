@@ -1,9 +1,14 @@
+use bevy::{
+    prelude::{EventWriter, Query, ResMut, Transform, With, Without},
+    sprite::collide_aabb::{collide, Collision},
+};
 
-use bevy::{prelude::{
-    Query, ResMut, EventWriter, Transform, Without, With,
-}, sprite::collide_aabb::{collide, Collision}};
-
-use crate::components::{scoreboard::Scoreboard, velocity::Velocity, collider::{Collider, CollisionEvent}, ball::Ball};
+use crate::components::{
+    ball::Ball,
+    collider::{Collider, CollisionEvent},
+    scoreboard::Scoreboard,
+    velocity::Velocity,
+};
 
 pub fn check_for_collisions(
     mut scoreboard: ResMut<Scoreboard>,

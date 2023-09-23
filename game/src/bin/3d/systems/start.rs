@@ -1,6 +1,5 @@
-use bevy::prelude::{Res, ResMut, Input, KeyCode};
 use crate::components::scoreboard::Scoreboard;
-
+use bevy::prelude::{Input, KeyCode, Res, ResMut};
 
 pub fn game_starts(score: Res<Scoreboard>) -> bool {
     score.start

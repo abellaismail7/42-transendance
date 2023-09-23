@@ -1,7 +1,4 @@
-
-use bevy::prelude::{
-    Query, Transform, Res, FixedTime
-};
+use bevy::prelude::{FixedTime, Query, Res, Transform};
 
 use crate::components::velocity::Velocity;
 
@@ -11,4 +8,3 @@ pub fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: 
         transform.translation.y += velocity.y * time_step.period.as_secs_f32();
     }
 }
-

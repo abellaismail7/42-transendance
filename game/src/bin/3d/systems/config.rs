@@ -1,5 +1,4 @@
-
-use bevy::prelude::{ResMut, GizmoConfig, Input, KeyCode, Res};
+use bevy::prelude::{GizmoConfig, Input, KeyCode, Res, ResMut};
 
 pub fn update_config(mut config: ResMut<GizmoConfig>, keyboard: Res<Input<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::D) {

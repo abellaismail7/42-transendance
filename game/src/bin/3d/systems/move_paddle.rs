@@ -1,6 +1,5 @@
-use bevy::prelude::{Res, Input, KeyCode, Query, With, Transform, FixedTime};
-use crate::components::{paddle::Paddle, config::Config};
-
+use crate::components::{config::Config, paddle::Paddle};
+use bevy::prelude::{FixedTime, Input, KeyCode, Query, Res, Transform, With};
 
 pub fn move_paddle(
     keyboard_input: Res<Input<KeyCode>>,
