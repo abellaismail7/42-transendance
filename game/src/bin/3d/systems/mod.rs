@@ -4,3 +4,4 @@ pub mod collisions;
 pub mod config;
 pub mod move_paddle;
 pub mod start;
+pub mod result;

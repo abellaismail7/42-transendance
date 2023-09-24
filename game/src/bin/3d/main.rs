@@ -6,8 +6,9 @@ use systems::{
     collisions::check_for_collisions,
     config::update_config,
     move_paddle::move_paddle,
-    start::{game_starts, start_game},
+    start::{game_starts, start_game}, result::update_result,
 };
+
 
 mod components;
 mod init;
@@ -24,6 +25,7 @@ fn main() {
         //.add_systems(Update, ( rotate_camera, update_config))
         .add_systems(Update, update_config)
         .add_systems(Update, start_game)
+        .add_systems(FixedUpdate, update_result)
         .add_systems(
             FixedUpdate,
             (

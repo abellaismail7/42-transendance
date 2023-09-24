@@ -34,7 +34,6 @@ struct AnimateRotation;
 struct AnimateScale;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let texture_handle = asset_server.load("ground.png");
     let font = asset_server.load("fonts/sporttype.ttf");
     let text_style = TextStyle {
         font,
@@ -43,10 +42,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
     let text_alignment = TextAlignment::Center;
     commands.spawn(Camera2dBundle::default());
-    commands.spawn(SpriteBundle {
-        texture: texture_handle,
-        ..Default::default()
-    });
     commands.spawn((
         Text2dBundle {
             text: Text::from_section("Ping Pong", text_style)
