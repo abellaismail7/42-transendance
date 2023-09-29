@@ -1,6 +1,5 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
-import { FindMessagesDto } from './dto/find-messages.dto';
 import { JoinChannelDto } from './dto/join-channel.dto';
 
 import {
@@ -11,22 +10,22 @@ import {
 } from '@nestjs/common';
 
 import { hash, compare } from 'bcrypt';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class ChannelsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createChannel({ access, name, ownerId, password }: CreateChannelDto) {
-    await this.asssertUserExists(ownerId);
+  async createChannel(props: CreateChannelDto) {
+    await this.asssertUserExists(props.ownerId);
     return await this.prisma.channel.create({
       data: {
-        access,
-        name,
-        ownerId,
-        password: password !== undefined ? await hash(password, 10) : null,
+        ...props,
+        password:
+          props.password !== undefined ? await hash(props.password, 10) : null,
         members: {
           create: {
-            userId: ownerId,
+            userId: props.ownerId,
             isAdmin: true,
             joinStatus: 'JOINED',
           },
@@ -86,16 +85,48 @@ export class ChannelsService {
 
   async findChannelsFor(userId: string) {
     await this.asssertUserExists(userId);
-    return await this.prisma.channel.findMany({
+    const channels = await this.prisma.channel.findMany({
       where: { members: { some: { userId } } },
     });
+    const res = await Promise.all(
+      channels.map(async (channel) => {
+        const lastMessage = await this.prisma.channelMessage.findFirst({
+          where: { channelId: channel.id },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const member = await this.prisma.channelMember.findFirst({
+          where: { channelId: channel.id, userId },
+        });
+
+        const lastMessageContent =
+          member?.joinStatus === 'JOINED'
+            ? lastMessage?.content ?? 'There are no messages'
+            : null;
+
+        return {
+          id: channel.id,
+          name: channel.name,
+          image: channel.image,
+          lastMessage: lastMessageContent,
+          joinStatus: member!.joinStatus,
+        };
+      }),
+    );
+    return res;
   }
 
-  async findMessages({ userId, channelId }: FindMessagesDto) {
+  async findMessages(userId: string, channelId: string) {
     await this.asssertUserExists(userId);
     await this.asssertChannelExists(channelId);
     await this.assertIsMember(channelId, userId);
     return await this.prisma.channelMessage.findMany({ where: { channelId } });
+  }
+
+  async sendMessage(sendMessageDto: SendMessageDto) {
+    return await this.prisma.channelMessage.create({
+      data: { ...sendMessageDto },
+    });
   }
 
   private async assertIsMember(channelId: string, userId: string) {

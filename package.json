@@ -9,10 +9,10 @@
     "game": "cd game && cargo run --bin 3d"
   },
   "devDependencies": {
-    "@turbo/gen": "^1.9.7",
+    "@turbo/gen": "^1.10.14",
     "eslint": "^7.32.0",
     "eslint-config-custom": "workspace:*",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "turbo": "latest"
   },
   "packageManager": "pnpm@8.6.10",

@@ -1,5 +1,5 @@
-import { FindMessagesDto, FindMessagesScheme } from './dto/find-messages.dto';
 import { JoinChannelDto, JoinChannelScheme } from './dto/join-channel.dto';
+import { SendMessageDto, SendMessageScheme } from './dto/send-message.dto';
 import { ZodValidationPipe } from 'src/zod/zod.validator';
 import { ChannelsService } from './channels.service';
 
@@ -10,6 +10,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UsePipes,
 } from '@nestjs/common';
 
@@ -28,20 +29,28 @@ export class ChannelsController {
     return await this.channelsService.createChannel(createChannelDto);
   }
 
+  @Get('messages')
+  async findMessages(
+    @Query('userId', ParseUUIDPipe) userId: string,
+    @Query('channelId', ParseUUIDPipe) channelId: string,
+  ) {
+    return await this.channelsService.findMessages(userId, channelId);
+  }
+
+  @Post('messages')
+  @UsePipes(new ZodValidationPipe(SendMessageScheme))
+  async sendMessage(@Body() sendMessageDto: SendMessageDto) {
+    return await this.channelsService.sendMessage(sendMessageDto);
+  }
+
   @Post('join')
   @UsePipes(new ZodValidationPipe(JoinChannelScheme))
   async joinChannel(@Body() joinChannelDto: JoinChannelDto) {
-    return this.channelsService.joinChannel(joinChannelDto);
-  }
-
-  @Get('messages')
-  @UsePipes(new ZodValidationPipe(FindMessagesScheme))
-  async findMessages(@Body() findMessagesDto: FindMessagesDto) {
-    return await this.channelsService.findMessages(findMessagesDto);
+    return await this.channelsService.joinChannel(joinChannelDto);
   }
 
   @Get('user/:userId')
-  async findChannelsFor(@Param('userId', ParseUUIDPipe) userId: string) {
-    return await this.channelsService.findChannelsFor(userId);
+  findChannelsFor(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.channelsService.findChannelsFor(userId);
   }
 }

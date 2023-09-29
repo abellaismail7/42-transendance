@@ -27,6 +27,7 @@ model Channel {
   password  String?
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  image     String
   owner     User             @relation(fields: [ownerId], references: [id])
   members   ChannelMember[]
   messages  ChannelMessage[]
@@ -51,6 +52,7 @@ model ChannelMessage {
   channelId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  content   String
   channel   Channel  @relation(fields: [channelId], references: [id])
   sender    User     @relation(fields: [senderId], references: [id])
 }
