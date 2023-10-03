@@ -1,6 +1,8 @@
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 import { JoinChannelDto } from './dto/join-channel.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { hash, compare } from 'bcrypt';
 
 import {
   ForbiddenException,
@@ -9,12 +11,23 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { hash, compare } from 'bcrypt';
-import { SendMessageDto } from './dto/send-message.dto';
-
 @Injectable()
 export class ChannelsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  findMembers(channelId: string) {
+    return this.prisma.channelMember.findMany({
+      where: { channelId, joinStatus: 'JOINED', isBanned: false },
+      select: {
+        isAdmin: true,
+        isMuted: true,
+        muteDuration: true,
+        user: {
+          select: { id: true, username: true, login: true, state: true },
+        },
+      },
+    });
+  }
 
   async createChannel(props: CreateChannelDto & { image: string }) {
     await this.asssertUserExists(props.ownerId);

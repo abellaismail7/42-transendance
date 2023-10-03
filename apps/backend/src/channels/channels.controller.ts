@@ -62,6 +62,11 @@ export class ChannelsController {
     return await this.channelsService.findMessages(userId, channelId);
   }
 
+  @Get('/members/:channelId')
+  async findMembers(@Param('channelId', ParseUUIDPipe) channelId: string) {
+    return this.channelsService.findMembers(channelId);
+  }
+
   @Post('messages')
   @UsePipes(new ZodValidationPipe(SendMessageScheme))
   async sendMessage(@Body() sendMessageDto: SendMessageDto) {
