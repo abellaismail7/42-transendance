@@ -1,7 +1,7 @@
 import { Avatar, Chip } from "@nextui-org/react";
 import { useEffect } from "react";
-import { socket } from "../../globals";
-import { Channel } from "../../_dto/ChannelDto";
+import { socket } from "../globals";
+import { Channel } from "../_dto/ChannelDto";
 
 export type ChannelItemProps = {
   channel: Channel;

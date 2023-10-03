@@ -16,8 +16,9 @@ import { SendMessageDto } from './dto/send-message.dto';
 export class ChannelsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createChannel(props: CreateChannelDto) {
+  async createChannel(props: CreateChannelDto & { image: string }) {
     await this.asssertUserExists(props.ownerId);
+
     return await this.prisma.channel.create({
       data: {
         ...props,

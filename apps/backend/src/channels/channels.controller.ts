@@ -11,7 +11,11 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseInterceptors,
   UsePipes,
+  UploadedFile,
+  ParseFilePipe,
+  FileTypeValidator,
 } from '@nestjs/common';
 
 import {
@@ -19,14 +23,35 @@ import {
   CreateChannelScheme,
 } from './dto/create-channel.dto';
 
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+
 @Controller('channels')
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
 
   @Post('create')
-  @UsePipes(new ZodValidationPipe(CreateChannelScheme))
-  async createChannel(@Body() createChannelDto: CreateChannelDto) {
-    return await this.channelsService.createChannel(createChannelDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './avatars/',
+      }),
+    }),
+  )
+  async createChannel(
+    @Body(new ZodValidationPipe(CreateChannelScheme))
+    createChannelDto: CreateChannelDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new FileTypeValidator({ fileType: 'image/*' })],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return await this.channelsService.createChannel({
+      ...createChannelDto,
+      image: `http://localhost:4000/${file.path}`,
+    });
   }
 
   @Get('messages')

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { socket } from "../../globals";
-import { Channel } from "../../_dto/ChannelDto";
-import { useChannelMessages } from "../ChannelMessagesRepository";
+import { socket } from "../globals";
+import { Channel } from "../_dto/ChannelDto";
+import { useChannelMessages } from "./ChannelMessagesRepository";
 import { MessageInput } from "./MessageInput";
 
 export type MessagesProps = {

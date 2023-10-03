@@ -14,11 +14,19 @@ export type ChannelVisibility = "PROTECTED" | "PRIVATE" | "PUBLIC";
 export type CreateChannelProps = {
   name: string;
   ownerId: string;
-  image: string;
+  image: File | null;
   access: ChannelVisibility;
   password?: string;
 };
 
 export function createChannel(createPayload: CreateChannelProps) {
-  return api.post("/channels/create", createPayload);
+  const formData = new FormData();
+  formData.append("image", createPayload.image ?? "https://placehold.co/400");
+  formData.append("name", createPayload.name);
+  formData.append("ownerId", createPayload.ownerId);
+  formData.append("access", createPayload.access);
+  if (createPayload.password) {
+    formData.append("password", createPayload.password);
+  }
+  return api.post("/channels/create", formData);
 }

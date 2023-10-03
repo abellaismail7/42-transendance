@@ -7,7 +7,6 @@ export const CreateChannelScheme = z
   .object({
     name: z.string(),
     ownerId: z.string().uuid(),
-    image: z.string().url(),
     access: z.union([
       z.literal('PROTECTED'),
       z.literal('PRIVATE'),

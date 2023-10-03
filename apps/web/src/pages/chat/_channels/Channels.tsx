@@ -3,8 +3,8 @@ import { PlusCircle } from "lucide-react";
 import { useMutation, useQueryClient } from "react-query";
 import { useChannels, createChannel } from "./ChannelsRepository";
 import { Channel } from "../_dto/ChannelDto";
-import { CreateChannelModal } from "./_compoenents/CreateChannelModel";
-import { ChannelItem } from "./_compoenents/ChannelItem";
+import { CreateChannelModal } from "./CreateChannelModel";
+import { ChannelItem } from "./ChannelItem";
 
 type ChannelsProps = {
   onClick: (channel: Channel) => void;
@@ -44,7 +44,7 @@ export function Channels({ onClick, isSelected, userId }: ChannelsProps) {
                 createChannelMuation.mutate({
                   name: payload.name,
                   ownerId: userId,
-                  image: "https://placehold.co/400",
+                  image: payload.image,
                   access: payload.visibility,
                   password: payload.password,
                 });

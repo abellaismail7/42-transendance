@@ -1,5 +1,5 @@
 import { Channel } from "../_dto/ChannelDto";
-import { Messages } from "./_components/MessageItem";
+import { Messages } from "./MessageItem";
 
 export type ChatSpaceProps = {
   channel: Channel | null;
