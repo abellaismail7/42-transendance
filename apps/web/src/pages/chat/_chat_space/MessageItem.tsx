@@ -36,7 +36,7 @@ export function Messages({ userId, channel, onSend }: MessagesProps) {
   }, [messages]);
 
   return (
-    <div className="flex flex-col w-full gap-[18px]">
+    <div className="flex flex-col flex-1 gap-[18px]">
       <p className="text-[20px] font-bold">{channel.name}</p>
       <div ref={chatBoxRef} className="flex flex-col flex-1 overflow-y-scroll">
         <div className="flex-1"></div>
@@ -51,9 +51,11 @@ export function Messages({ userId, channel, onSend }: MessagesProps) {
           </div>
         )}
       </div>
-      <MessageInput onSend={(message) => {
-        onSend(channel.id, message);
-      }}/>
+      <MessageInput
+        onSend={(message) => {
+          onSend(channel.id, message);
+        }}
+      />
     </div>
   );
 }

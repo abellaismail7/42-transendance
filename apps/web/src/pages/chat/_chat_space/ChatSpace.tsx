@@ -10,7 +10,7 @@ export type ChatSpaceProps = {
 export function ChatSpace({ channel, userId, onSend }: ChatSpaceProps) {
   if (channel === null) {
     return (
-      <div className="flex items-center justify-center flex-1 h-full">
+      <div className="flex flex-1 items-center justify-center h-full">
         <p>To start chatting, select one of the channels.</p>
       </div>
     );
@@ -18,7 +18,7 @@ export function ChatSpace({ channel, userId, onSend }: ChatSpaceProps) {
 
   if (channel.joinStatus === "WAIT_FOR_APPROVAL") {
     return (
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="flex flex-1 items-center justify-center h-full">
         <p>You are not approved yet to join this channels.</p>
       </div>
     );

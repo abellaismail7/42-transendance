@@ -1,7 +1,6 @@
 import { useDisclosure, CircularProgress } from "@nextui-org/react";
 import { PlusCircle } from "lucide-react";
-import { useMutation, useQueryClient } from "react-query";
-import { useChannels, createChannel } from "./ChannelsRepository";
+import { useChannels } from "./ChannelsRepository";
 import { Channel } from "../_dto/ChannelDto";
 import { CreateChannelModal } from "./CreateChannelModel";
 import { ChannelItem } from "./ChannelItem";
@@ -21,15 +20,10 @@ export function Channels({ onClick, isSelected, userId }: ChannelsProps) {
     data: channels,
   } = useChannels(userId);
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const queryClient = useQueryClient();
-
-  const createChannelMuation = useMutation(createChannel, {
-    onSuccess: () => queryClient.invalidateQueries("channels"),
-  });
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   return (
-    <div className="flex items-center justify-center w-[500px]">
+    <div className="flex items-center justify-center w-[350px]">
       {isLoading && <CircularProgress aria-label="Loading..." />}
       {isError && <p>{String(error)}</p>}
       {isSuccess && (
@@ -38,20 +32,13 @@ export function Channels({ onClick, isSelected, userId }: ChannelsProps) {
             <p className="text-[18px] font-bold">Channels</p>
             <PlusCircle onClick={onOpen} />
             <CreateChannelModal
-              isOpen={isOpen}
               onOpenChange={onOpenChange}
-              createChannel={(payload) => {
-                createChannelMuation.mutate({
-                  name: payload.name,
-                  ownerId: userId,
-                  image: payload.image,
-                  access: payload.visibility,
-                  password: payload.password,
-                });
-              }}
+              onClose={onClose}
+              isOpen={isOpen}
+              userId={userId}
             />
           </div>
-          <div className="flex flex-col w-full gap-[12px]">
+          <div className="flex flex-col w-full gap-[12px] overflow-y-scroll">
             {channels.map((channel, index) => (
               <ChannelItem
                 key={index}

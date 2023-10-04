@@ -21,10 +21,12 @@ export type CreateChannelProps = {
 
 export function createChannel(createPayload: CreateChannelProps) {
   const formData = new FormData();
-  formData.append("image", createPayload.image ?? "https://placehold.co/400");
   formData.append("name", createPayload.name);
   formData.append("ownerId", createPayload.ownerId);
   formData.append("access", createPayload.access);
+  if (createPayload.image) {
+    formData.append("image", createPayload.image);
+  }
   if (createPayload.password) {
     formData.append("password", createPayload.password);
   }

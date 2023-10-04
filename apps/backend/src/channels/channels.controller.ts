@@ -44,13 +44,16 @@ export class ChannelsController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: 'image/*' })],
+        fileIsRequired: false,
       }),
     )
-    file: Express.Multer.File,
+    file: Express.Multer.File | null,
   ) {
     return await this.channelsService.createChannel({
       ...createChannelDto,
-      image: `http://localhost:4000/${file.path}`,
+      image: file
+        ? `http://localhost:4000/${file.path}`
+        : 'https://placehold.co/400', // TODO(saidooubella): Need to be changed with a more bette alternative
     });
   }
 
