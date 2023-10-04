@@ -1,17 +1,21 @@
 import { useDisclosure, CircularProgress } from "@nextui-org/react";
 import { PlusCircle } from "lucide-react";
 import { useChannels } from "./ChannelsRepository";
-import { Channel } from "../_dto/ChannelDto";
+import { ChannelDto } from "./ChannelDto";
 import { CreateChannelModal } from "./CreateChannelModel";
-import { ChannelItem } from "./ChannelItem";
+import { Channel } from "./Channel";
 
-type ChannelsProps = {
-  onClick: (channel: Channel) => void;
-  isSelected: (channel: Channel) => boolean;
+export type ChannelsProps = {
+  onChannelSelected: (channel: ChannelDto) => void;
+  isSelected: (channel: ChannelDto) => boolean;
   userId: string;
 };
 
-export function Channels({ onClick, isSelected, userId }: ChannelsProps) {
+export function Channels({
+  onChannelSelected,
+  isSelected,
+  userId,
+}: ChannelsProps) {
   const {
     isLoading,
     isError,
@@ -40,9 +44,9 @@ export function Channels({ onClick, isSelected, userId }: ChannelsProps) {
           </div>
           <div className="flex flex-col w-full gap-[12px] overflow-y-scroll">
             {channels.map((channel, index) => (
-              <ChannelItem
+              <Channel
                 key={index}
-                onClick={onClick}
+                onClick={onChannelSelected}
                 channel={channel}
                 isSelected={isSelected(channel)}
               />

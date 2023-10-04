@@ -1,15 +1,15 @@
 import { Avatar, Chip } from "@nextui-org/react";
 import { useEffect } from "react";
 import { socket } from "../globals";
-import { Channel } from "../_dto/ChannelDto";
+import { ChannelDto } from "./ChannelDto";
 
-export type ChannelItemProps = {
-  channel: Channel;
+export type ChannelProps = {
+  channel: ChannelDto;
   isSelected: boolean;
-  onClick: (channel: Channel) => void;
+  onClick: (channel: ChannelDto) => void;
 };
 
-export function ChannelItem({ channel, onClick, isSelected }: ChannelItemProps) {
+export function Channel({ channel, onClick, isSelected }: ChannelProps) {
   useEffect(() => {
     socket.emit("join_channel", channel.id);
     return () => {

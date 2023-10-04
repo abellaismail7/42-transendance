@@ -1,8 +1,6 @@
-import { useQuery } from "react-query";
-import { api } from "../globals";
 import { z } from "zod";
 
-export const MemberScheme = z.array(
+export const ChannelMemberScheme = z.array(
   z.object({
     isAdmin: z.boolean(),
     isMuted: z.boolean(),
@@ -11,6 +9,7 @@ export const MemberScheme = z.array(
       id: z.string().uuid(),
       username: z.string(),
       login: z.string(),
+      image: z.string().url(),
       state: z.union([
         z.literal("DO_NOT_DISTURB"),
         z.literal("IN_MATCH"),
@@ -21,12 +20,4 @@ export const MemberScheme = z.array(
   })
 );
 
-export function useChannelMembers(channelId: string) {
-  return useQuery({
-    queryKey: ["members", channelId],
-    queryFn: async () => {
-      const { data } = await api.get(`/channels/members/${channelId}`);
-      return MemberScheme.parse(data);
-    },
-  });
-}
+export type ChannelMemberDto = z.infer<typeof ChannelMemberScheme>[number];

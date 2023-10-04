@@ -1,12 +1,15 @@
 import { ChannelMembers } from "./_channel_members/ChannelMembers";
-import { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
+import { ChannelMemberDto } from "./_channel_members/ChannelMemberDto";
 import { ChatSpace } from "./_chat_space/ChatSpace";
+import { ChannelDto } from "./_channels/ChannelDto";
 import { Channels } from "./_channels/Channels";
-import { Channel } from "./_dto/ChannelDto";
+import { useQueryClient } from "react-query";
+import { useEffect, useState } from "react";
 import { socket } from "./globals";
+import { X } from "lucide-react";
 
 import {
+  Avatar,
   Button,
   Input,
   Modal,
@@ -55,8 +58,44 @@ function UserIdPrompt({ setUserId }: { setUserId: (userId: string) => void }) {
   );
 }
 
+type ChannelMemberDetailsProps = {
+  member: ChannelMemberDto;
+  onClose: () => void;
+};
+
+function ChannelMemberDetails({ member, onClose }: ChannelMemberDetailsProps) {
+  return (
+    <div className="flex h-full w-[350px] flex-col gap-[24px]">
+      <div className="flex items-center justify-end">
+        <X onClick={onClose} />
+      </div>
+      <div className="flex flex-col items-center">
+        <Avatar
+          className="w-[150px] h-[150px]"
+          src={member.user.image}
+          size="lg"
+        />
+        <p className="text-[20px] pt-[16px]">
+          {member.user.username}
+          {member.isAdmin && (
+            <span className="p-[4px] font-bold text-[12px] rounded-[6px] bg-red-100">
+              admin
+            </span>
+          )}
+        </p>
+        <p>@{member.user.login}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Chat() {
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<ChannelDto | null>(
+    null
+  );
+  const [selectedMember, setSelectedMember] = useState<ChannelMemberDto | null>(
+    null
+  );
   const [userId, setUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -76,7 +115,12 @@ export default function Chat() {
       {userId !== null ? (
         <>
           <Channels
-            onClick={(channel) => setSelectedChannel(channel)}
+            onChannelSelected={(channel) => {
+              if (selectedChannel?.id !== channel.id) {
+                setSelectedChannel(channel);
+                setSelectedMember(null);
+              }
+            }}
             isSelected={(channel) => selectedChannel?.id === channel.id}
             userId={userId}
           />
@@ -91,7 +135,18 @@ export default function Chat() {
               });
             }}
           />
-          {selectedChannel && <ChannelMembers channelId={selectedChannel.id} />}
+          {selectedChannel &&
+            (selectedMember !== null ? (
+              <ChannelMemberDetails
+                member={selectedMember}
+                onClose={() => setSelectedMember(null)}
+              />
+            ) : (
+              <ChannelMembers
+                onMemberSelected={(member) => setSelectedMember(member)}
+                channelId={selectedChannel.id}
+              />
+            ))}
         </>
       ) : (
         <UserIdPrompt setUserId={setUserId} />

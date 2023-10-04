@@ -1,8 +1,8 @@
-import { Channel } from "../_dto/ChannelDto";
-import { Messages } from "./MessageItem";
+import { ChannelDto } from "../_channels/ChannelDto";
+import { Messages } from "./Messages";
 
 export type ChatSpaceProps = {
-  channel: Channel | null;
+  channel: ChannelDto | null;
   userId: string;
   onSend: (channelId: string, message: string) => void;
 };

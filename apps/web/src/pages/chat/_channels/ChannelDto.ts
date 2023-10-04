@@ -10,4 +10,4 @@ export const ChannelsScheme = z.array(
   })
 );
 
-export type Channel = z.infer<typeof ChannelsScheme>[number];
+export type ChannelDto = z.infer<typeof ChannelsScheme>[number];

@@ -1,4 +1,4 @@
-import { ChannelsScheme } from "../_dto/ChannelDto";
+import { ChannelsScheme } from "./ChannelDto";
 import { useQuery } from "react-query";
 import { api } from "../globals";
 

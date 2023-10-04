@@ -64,6 +64,13 @@ export function CreateChannelModal({
     setState((old) => ({ ...old, [key]: value }));
   }
 
+  function handleOpenChane(isOpen: boolean) {
+    if (!isOpen) {
+      setState(initialState());
+      onOpenChange();
+    }
+  }
+
   const queryClient = useQueryClient();
 
   const createChannelMuation = useMutation(createChannel, {
@@ -72,7 +79,6 @@ export function CreateChannelModal({
 
   useEffect(() => {
     if (createChannelMuation.isSuccess) {
-      setState(initialState());
       onClose();
     }
   }, [createChannelMuation.isSuccess]);
@@ -86,7 +92,7 @@ export function CreateChannelModal({
   }, [state.image]);
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange} isDismissable={false}>
+    <Modal isOpen={isOpen} onOpenChange={handleOpenChane} isDismissable={false}>
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           Create new channel
@@ -144,9 +150,6 @@ export function CreateChannelModal({
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
-            Close
-          </Button>
           <Button
             color="primary"
             onPress={() => {

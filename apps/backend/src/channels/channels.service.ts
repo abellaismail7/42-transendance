@@ -23,7 +23,13 @@ export class ChannelsService {
         isMuted: true,
         muteDuration: true,
         user: {
-          select: { id: true, username: true, login: true, state: true },
+          select: {
+            id: true,
+            username: true,
+            login: true,
+            state: true,
+            image: true,
+          },
         },
       },
     });
