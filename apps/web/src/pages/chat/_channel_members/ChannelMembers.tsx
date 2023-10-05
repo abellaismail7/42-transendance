@@ -14,7 +14,7 @@ export function ChannelMembers({
   const { isSuccess, data: members } = useChannelMembers(channelId);
 
   return (
-    <div className="flex h-full w-[350px] flex-col gap-[24px]">
+    <div className="flex h-full w-[350px] flex-col gap-[24px] overflow-y-scroll">
       <p className="text-[18px] font-bold">Memebers</p>
       {isSuccess && (
         <div className="flex flex-col w-full gap-[12px]">

@@ -10,6 +10,14 @@ const MessageScheme = z.array(
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),
     content: z.string(),
+    sender: z
+      .object({
+        id: z.string().uuid(),
+        username: z.string(),
+        login: z.string(),
+        image: z.string().url(),
+      })
+      .strict(),
   })
 );
 

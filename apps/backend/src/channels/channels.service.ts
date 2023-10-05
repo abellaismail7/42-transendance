@@ -140,7 +140,19 @@ export class ChannelsService {
     await this.asssertUserExists(userId);
     await this.asssertChannelExists(channelId);
     await this.assertIsMember(channelId, userId);
-    return await this.prisma.channelMessage.findMany({ where: { channelId } });
+    return await this.prisma.channelMessage.findMany({
+      where: { channelId },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            login: true,
+            image: true,
+          },
+        },
+      },
+    });
   }
 
   async sendMessage(sendMessageDto: SendMessageDto) {

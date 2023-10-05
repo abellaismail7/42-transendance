@@ -27,7 +27,7 @@ export function Channels({
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   return (
-    <div className="flex items-center justify-center w-[350px]">
+    <div className="flex h-full w-[350px] items-center justify-center">
       {isLoading && <CircularProgress aria-label="Loading..." />}
       {isError && <p>{String(error)}</p>}
       {isSuccess && (
@@ -42,7 +42,7 @@ export function Channels({
               userId={userId}
             />
           </div>
-          <div className="flex flex-col w-full gap-[12px] overflow-y-scroll">
+          <div className="flex flex-col h-full w-full gap-[12px] overflow-y-scroll">
             {channels.map((channel, index) => (
               <Channel
                 key={index}
