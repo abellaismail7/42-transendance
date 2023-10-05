@@ -5,16 +5,16 @@ use bevy::{
 
 use crate::components::{
     ball::Ball,
-    collider::{Collider, CollisionEvent},
+    collider::Collider,
     scoreboard::Scoreboard,
-    velocity::Velocity,
+    velocity::Velocity, text_result::ScoreEvent, paddle::PaddleSide,
 };
 
 pub fn check_for_collisions(
     mut scoreboard: ResMut<Scoreboard>,
     mut ball_set: Query<(&mut Velocity, &mut Transform), With<Ball>>,
     collider_query: Query<(&Collider, &Transform), Without<Ball>>,
-    mut collision_events: EventWriter<CollisionEvent>,
+    mut score_event: EventWriter<ScoreEvent>,
 ) {
     let (mut ball_velocity, mut ball_transform) = ball_set.single_mut();
     let ball_size = ball_transform.scale.truncate();
@@ -28,8 +28,6 @@ pub fn check_for_collisions(
             transform.scale.truncate(),
         );
         if let Some(collision) = collision {
-            // Sends a collision event so that other systems can react to the collision
-            collision_events.send_default();
 
             // reflect the ball when it collides
             let mut reflect_x = false;
@@ -41,25 +39,31 @@ pub fn check_for_collisions(
                 Collision::Left => {
                     reflect_x = ball_velocity.x > 0.0;
                     if collider_entity.scorable {
-                        scoreboard.left += 1;
-                        scoreboard.start = false;
-                        ball_transform.translation.x = 0.0;
-                        ball_transform.translation.y = 0.0;
-                    }
-                    scoreboard.turn.switch();
-                }
-                Collision::Right => {
-                    reflect_x = ball_velocity.x < 0.0;
-                    if collider_entity.scorable {
                         scoreboard.right += 1;
                         scoreboard.start = false;
                         ball_transform.translation.x = 0.0;
                         ball_transform.translation.y = 0.0;
+                        score_event.send(ScoreEvent(scoreboard.left, PaddleSide::Left));
                     }
                     scoreboard.turn.switch();
-                }
-                Collision::Top => reflect_y = ball_velocity.y < 0.0,
-                Collision::Bottom => reflect_y = ball_velocity.y > 0.0,
+                },
+                Collision::Right => {
+                    reflect_x = ball_velocity.x < 0.0;
+                    if collider_entity.scorable {
+                        scoreboard.left += 1;
+                        scoreboard.start = false;
+                        ball_transform.translation.x = 0.0;
+                        ball_transform.translation.y = 0.0;
+                        score_event.send(ScoreEvent(scoreboard.right, PaddleSide::Right));
+                    }
+                    scoreboard.turn.switch();
+                },
+                Collision::Top => {
+                    reflect_y = ball_velocity.y < 0.0;
+                },
+                Collision::Bottom => {
+                    reflect_y = ball_velocity.y > 0.0;
+                },
                 Collision::Inside => {}
             }
 

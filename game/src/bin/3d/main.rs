@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use components::{collider::CollisionEvent, config::Config, scoreboard::Scoreboard};
+use components::{ config::Config, scoreboard::Scoreboard, text_result::ScoreEvent};
 use init::setup::setup;
 use systems::{
     ball_velocity::apply_velocity,
@@ -19,13 +19,14 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
         .insert_resource(FixedTime::new_from_secs(1.0 / 60.0))
-        .add_event::<CollisionEvent>()
+        .add_event::<ScoreEvent>()
         .insert_resource(Scoreboard::default())
         .insert_resource(Config::default())
         //.add_systems(Update, ( rotate_camera, update_config))
+        
         .add_systems(Update, update_config)
         .add_systems(Update, start_game)
-        .add_systems(FixedUpdate, update_result)
+        .add_systems(Update, update_result)
         .add_systems(
             FixedUpdate,
             (

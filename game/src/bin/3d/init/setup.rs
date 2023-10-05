@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use meshtext::{MeshGenerator, MeshText, TextSection};
 
 use crate::components::{
-    ball::Ball, collider::Collider, config::Config, paddle::Paddle, velocity::Velocity,
+    ball::Ball, collider::Collider, config::Config, paddle::{Paddle, PaddleSide}, velocity::Velocity,
     wall::WallBundle, scoreboard, text_result::ScoreboardText,
 };
 
@@ -30,12 +30,12 @@ pub fn setup(
         )).with_scale(Vec3::new(5.0, 5.0, 5.0)),
         ..default()
     });
-    // cube
+    // padddles
     commands.spawn((
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(0., 3.4, 0.1).with_scale(Vec3::new(1.0, 0.2, 0.2)),
+            transform: Transform::from_xyz(4.5, 0.0, 0.1).with_scale(Vec3::new(0.2, 1.0, 0.2)),
             ..default()
         },
         Paddle::left(),
@@ -45,7 +45,7 @@ pub fn setup(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(0., -3.4, 0.1).with_scale(Vec3::new(1.0, 0.2, 0.2)),
+            transform: Transform::from_xyz(-4.5, 0.0, 0.1).with_scale(Vec3::new(0.2, 1., 0.2)),
             ..default()
         },
         Paddle::right(),
@@ -55,7 +55,7 @@ pub fn setup(
     // ball
     commands.spawn((
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::UVSphere {
+           mesh: meshes.add(Mesh::from(shape::UVSphere {
                 radius: 1.0,
                 ..default()
             })),
@@ -76,29 +76,33 @@ pub fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
+
     // WALLS
     commands.spawn(WallBundle::new_pbr(
-        Transform::from_xyz(0., 3.5, 0.).with_scale(Vec3::new(5.0, 0.1, 0.2)),
-        &mut meshes,
-        &mut materials,
-    ));
-    commands.spawn(WallBundle::new_pbr(
-        Transform::from_xyz(0., -3.5, 0.).with_scale(Vec3::new(5.0, 0.1, 0.2)),
+        Transform::from_xyz(0., 2.5, 0.).with_scale(Vec3::new(9.1, 0.1, 0.2)),
         &mut meshes,
         &mut materials,
     ));
 
     commands.spawn(WallBundle::new_pbr(
-        Transform::from_xyz(2.5, 0., 0.).with_scale(Vec3::new(0.1, 7.1, 0.2)),
+        Transform::from_xyz(0., -2.5, 0.).with_scale(Vec3::new(9.1, 0.1, 0.2)),
         &mut meshes,
         &mut materials,
     ));
 
     commands.spawn(WallBundle::new_pbr(
-        Transform::from_xyz(-2.5, 0., 0.).with_scale(Vec3::new(0.1, 7.1, 0.2)),
+        Transform::from_xyz(4.5, 0., 0.).with_scale(Vec3::new(0.1, 5.0, 0.2)),
         &mut meshes,
         &mut materials,
-    ));
+    ))
+    .insert(Collider { scorable: true });
+
+    commands.spawn(WallBundle::new_pbr(
+        Transform::from_xyz(-4.5, 0., 0.).with_scale(Vec3::new(0.1, 5.0, 0.2)),
+        &mut meshes,
+        &mut materials,
+    ))
+    .insert(Collider { scorable: true });
 
     let font = asset_server.load("fonts/sporttype.ttf");
     let text_style = TextStyle {
@@ -132,8 +136,8 @@ pub fn setup(
                 // transform mesh so that it is in the center
                 transform: Transform::from_translation(Vec3::new(
                     xcenter,
-                    0f32,
-                    0f32,
+                    0.,
+                    -0.2,
                 )),
             ..Default::default()
         });
@@ -144,28 +148,28 @@ pub fn setup(
                 material: materials.add(Color::rgb(1., 1., 1.).into()),
                 // transform mesh so that it is in the center
                 transform: Transform::from_translation(Vec3::new(
-                    xcenter,
-                    1.5,
+                    xcenter - 2.0,
                     0.,
+                    -0.2,
                 )),
             ..Default::default()
         })
-        .insert(ScoreboardText);
+        .insert(ScoreboardText::new(PaddleSide::Left));
 
     let (mesh, xcenter) = get_text_mesh(scoreboard.right.to_string().as_str(), 0.5);
     commands
         .spawn(PbrBundle {
                 mesh: meshes.add(mesh),
-                material: materials.add(Color::rgb(1., 1., 1.).into()),
+                material: materials.add(Color::rgba(1., 1., 1., 0.7).into()),
                 // transform mesh so that it is in the center
                 transform: Transform::from_translation(Vec3::new(
-                    xcenter,
-                    -1.5,
+                    xcenter + 2.0 ,
                     0.,
+                    -0.2,
                 )),
             ..Default::default()
         })
-        .insert(ScoreboardText);
+        .insert(ScoreboardText::new(PaddleSide::Right));
 }
 
 /// set up a simple 3D scene with text

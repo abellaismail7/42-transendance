@@ -16,16 +16,16 @@ pub fn move_paddle(
     if let Some((_, mut paddle_transform)) = Some(paddle_transform) {
         let mut direction = 0.0;
 
-        if keyboard_input.pressed(KeyCode::Left) {
+        if keyboard_input.pressed(KeyCode::Down) {
             direction -= 1.0;
         }
 
-        if keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.pressed(KeyCode::Up) {
             direction += 1.0;
         }
 
         // Calculate the new horizontal paddle position based on player input
-        let new_paddle_position = paddle_transform.translation.x
+        let new_paddle_position = paddle_transform.translation.y
             + direction * config.ball_speed * time_step.period.as_secs_f32();
 
         // Update the paddle position,
@@ -35,7 +35,7 @@ pub fn move_paddle(
         let up_bound = -2.0;
         let down_bound = 2.0;
 
-        paddle_transform.translation.x = new_paddle_position.clamp(up_bound, down_bound);
+        paddle_transform.translation.y = new_paddle_position.clamp(up_bound, down_bound);
     }
   })
 }

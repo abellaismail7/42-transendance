@@ -1,27 +1,29 @@
 use bevy::prelude::{
-    Assets, Handle, Mesh, Query, ResMut,  With, Mat4, Vec3,
-    KeyCode, Input, Res
+    Assets, Handle, Mesh, Query, ResMut,  Mat4, Vec3,
+     EventReader
 };
 use meshtext::{MeshGenerator, MeshText, TextSection};
-use crate::components::{text_result::ScoreboardText, scoreboard::Scoreboard};
+use crate::components::{text_result::{ScoreboardText, ScoreEvent}, scoreboard::Scoreboard, paddle::PaddleSide};
 
 
 static FONT_BYTES: &[u8] = include_bytes!("../../../../assets/fonts/RenegadePursuit.ttf");
 // static GENERATOR:MeshGenerator<Face<'_>> = ;
 
 pub fn update_result(
-    keyboard_input: Res<Input<KeyCode>>,
-    mesh_query: Query<&Handle<Mesh>, With<ScoreboardText>>,
+    mesh_query: Query<(&Handle<Mesh>, &ScoreboardText)>,
     mut meshes: ResMut<Assets<Mesh>>,
     scoreboard: ResMut<Scoreboard>,
+    mut score_event: EventReader<ScoreEvent>,
 ) {
-    if !keyboard_input.just_pressed(KeyCode::D) || !scoreboard.start {
-        return;
-    }
-    mesh_query.for_each(|mesh_handle| {
-        let text = scoreboard.left.to_string();
+    let iter = score_event.iter();
+    if iter.len() == 0 { return; }
+    println!("update_result");
+    let ev = iter.last().expect("No score event");
+    mesh_query.for_each(|(mesh_handle, score_text)| {
+        if score_text.side != ev.1 { return;}
+        let text = if score_text.side == PaddleSide::Left { scoreboard.left.to_string()} else { scoreboard.right.to_string() } ;
 
-        let text_mesh: MeshText = MeshGenerator::new(FONT_BYTES) 
+        let text_mesh: MeshText = MeshGenerator::new(FONT_BYTES)
             .generate_section(&text, false, Some(&Mat4::from_scale(Vec3::splat(0.5)).to_cols_array()))
             .unwrap();
 
@@ -34,5 +36,3 @@ pub fn update_result(
         mesh.compute_flat_normals();
     });
 }
-
-
