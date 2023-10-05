@@ -15,6 +15,30 @@ import {
 export class ChannelsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // TODO(saidooubella): marked for removal after using it for testing
+  delay(timeout: number) {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  }
+
+  async searchChannels(userId: string, query: string) {
+    return await this.prisma.channel.findMany({
+      where: {
+        access: { in: ['PUBLIC', 'PROTECTED'] },
+        name: { contains: query },
+        members: { none: { userId } },
+      },
+      select: {
+        id: true,
+        name: true,
+        ownerId: true,
+        access: true,
+        createdAt: true,
+        updatedAt: true,
+        image: true,
+      },
+    });
+  }
+
   findMembers(channelId: string) {
     return this.prisma.channelMember.findMany({
       where: { channelId, joinStatus: 'JOINED', isBanned: false },
@@ -156,7 +180,13 @@ export class ChannelsService {
   }
 
   async sendMessage(sendMessageDto: SendMessageDto) {
-    return await this.prisma.channelMessage.create({
+    await this.asssertUserExists(sendMessageDto.senderId);
+    await this.asssertChannelExists(sendMessageDto.channelId);
+    await this.assertIsMember(
+      sendMessageDto.channelId,
+      sendMessageDto.senderId,
+    );
+    return this.prisma.channelMessage.create({
       data: { ...sendMessageDto },
     });
   }

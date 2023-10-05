@@ -1,8 +1,9 @@
 import { useDisclosure, CircularProgress } from "@nextui-org/react";
-import { PlusCircle } from "lucide-react";
+import { SearchChannelsModal } from "./SearchChannelsModal";
+import { CreateChannelModal } from "./CreateChannelModel";
+import { PlusCircle, Search } from "lucide-react";
 import { useChannels } from "./ChannelsRepository";
 import { ChannelDto } from "./ChannelDto";
-import { CreateChannelModal } from "./CreateChannelModel";
 import { Channel } from "./Channel";
 
 export type ChannelsProps = {
@@ -16,31 +17,35 @@ export function Channels({
   isSelected,
   userId,
 }: ChannelsProps) {
-  const {
-    isLoading,
-    isError,
-    error,
-    isSuccess,
-    data: channels,
-  } = useChannels(userId);
+  const { isLoading, isError, isSuccess, data: channels } = useChannels(userId);
 
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+  const createModal = useDisclosure();
+  const searchModal = useDisclosure();
 
   return (
     <div className="flex h-full w-[350px] items-center justify-center">
       {isLoading && <CircularProgress aria-label="Loading..." />}
-      {isError && <p>{String(error)}</p>}
+      {isError && <p>An error occured while trying reching the server</p>}
       {isSuccess && (
         <div className="flex h-full w-full flex-col gap-[24px]">
           <div className="flex items-center justify-between">
             <p className="text-[18px] font-bold">Channels</p>
-            <PlusCircle onClick={onOpen} />
-            <CreateChannelModal
-              onOpenChange={onOpenChange}
-              onClose={onClose}
-              isOpen={isOpen}
-              userId={userId}
-            />
+            <div className="flex gap-[16px]">
+              <Search onClick={searchModal.onOpen} />
+              <SearchChannelsModal
+                onOpenChange={searchModal.onOpenChange}
+                onClose={searchModal.onClose}
+                isOpen={searchModal.isOpen}
+                userId={userId}
+              />
+              <PlusCircle onClick={createModal.onOpen} />
+              <CreateChannelModal
+                onOpenChange={createModal.onOpenChange}
+                onClose={createModal.onClose}
+                isOpen={createModal.isOpen}
+                userId={userId}
+              />
+            </div>
           </div>
           <div className="flex flex-col h-full w-full gap-[12px] overflow-y-scroll">
             {channels.map((channel, index) => (

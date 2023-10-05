@@ -38,7 +38,7 @@ export class ChannelsController {
       }),
     }),
   )
-  async createChannel(
+  createChannel(
     @Body(new ZodValidationPipe(CreateChannelScheme))
     createChannelDto: CreateChannelDto,
     @UploadedFile(
@@ -49,7 +49,7 @@ export class ChannelsController {
     )
     file: Express.Multer.File | null,
   ) {
-    return await this.channelsService.createChannel({
+    return this.channelsService.createChannel({
       ...createChannelDto,
       image: file
         ? `http://localhost:4000/${file.path}`
@@ -58,32 +58,40 @@ export class ChannelsController {
   }
 
   @Get('messages')
-  async findMessages(
+  findMessages(
     @Query('userId', ParseUUIDPipe) userId: string,
     @Query('channelId', ParseUUIDPipe) channelId: string,
   ) {
-    return await this.channelsService.findMessages(userId, channelId);
+    return this.channelsService.findMessages(userId, channelId);
   }
 
   @Get('/members/:channelId')
-  async findMembers(@Param('channelId', ParseUUIDPipe) channelId: string) {
+  findMembers(@Param('channelId', ParseUUIDPipe) channelId: string) {
     return this.channelsService.findMembers(channelId);
   }
 
   @Post('messages')
   @UsePipes(new ZodValidationPipe(SendMessageScheme))
-  async sendMessage(@Body() sendMessageDto: SendMessageDto) {
-    return await this.channelsService.sendMessage(sendMessageDto);
+  sendMessage(@Body() sendMessageDto: SendMessageDto) {
+    return this.channelsService.sendMessage(sendMessageDto);
   }
 
   @Post('join')
   @UsePipes(new ZodValidationPipe(JoinChannelScheme))
-  async joinChannel(@Body() joinChannelDto: JoinChannelDto) {
-    return await this.channelsService.joinChannel(joinChannelDto);
+  joinChannel(@Body() joinChannelDto: JoinChannelDto) {
+    return this.channelsService.joinChannel(joinChannelDto);
   }
 
   @Get('user/:userId')
   findChannelsFor(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.channelsService.findChannelsFor(userId);
+  }
+
+  @Get('search')
+  searchChannels(
+    @Query('userId', ParseUUIDPipe) userId: string,
+    @Query('q') query: string,
+  ) {
+    return this.channelsService.searchChannels(userId, query);
   }
 }

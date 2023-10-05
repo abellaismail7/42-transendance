@@ -14,7 +14,6 @@ export type MessagesProps = {
 export function Messages({ userId, channel, onSend }: MessagesProps) {
   const {
     isError,
-    error,
     isSuccess,
     isLoading,
     data: messages,
@@ -38,7 +37,7 @@ export function Messages({ userId, channel, onSend }: MessagesProps) {
   return (
     <div className="flex justify-center flex-1">
       {isLoading && <CircularProgress aria-label="Loading..." />}
-      {isError && <p>{String(error)}</p>}
+      {isError && <p>An error occured while trying reching the server</p>}
       {isSuccess && (
         <div className="flex flex-col flex-1 gap-[18px]">
           <p className="text-[20px] font-bold">{channel.name}</p>

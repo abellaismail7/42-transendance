@@ -25,7 +25,7 @@ export type CreateChannelForm = {
 };
 
 export type CreateChannelModalProps = {
-  onOpenChange: () => void;
+  onOpenChange: (isOpen: boolean) => void;
   onClose: () => void;
   isOpen: boolean;
   userId: string;
@@ -65,9 +65,9 @@ export function CreateChannelModal({
   }
 
   function handleOpenChane(isOpen: boolean) {
+    onOpenChange(isOpen);
     if (!isOpen) {
       setState(initialState());
-      onOpenChange();
     }
   }
 
