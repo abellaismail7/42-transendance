@@ -1,6 +1,6 @@
 import { useDisclosure, CircularProgress } from "@nextui-org/react";
 import { SearchChannelsModal } from "./SearchChannelsModal";
-import { CreateChannelModal } from "./CreateChannelModel";
+import { CreateChannelModal } from "./CreateChannelModal";
 import { PlusCircle, Search } from "lucide-react";
 import { useChannels } from "./ChannelsRepository";
 import { ChannelDto } from "./ChannelDto";
@@ -34,7 +34,6 @@ export function Channels({
               <Search onClick={searchModal.onOpen} />
               <SearchChannelsModal
                 onOpenChange={searchModal.onOpenChange}
-                onClose={searchModal.onClose}
                 isOpen={searchModal.isOpen}
                 userId={userId}
               />

@@ -1,10 +1,11 @@
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { joinChannel, searchChannels } from "./ChannelsRepository";
+import { SearchChannelItem } from "./SearchChannelItem";
 import { useDebounce } from "use-debounce";
 import { Search } from "lucide-react";
 import { useState } from "react";
 
 import {
-  Avatar,
-  Button,
   CircularProgress,
   Input,
   Modal,
@@ -13,56 +14,50 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 
-import { useQuery } from "react-query";
-import { api } from "../globals";
-import { z } from "zod";
-
 export type SearchChannelsModalProps = {
   onOpenChange: (isOpen: boolean) => void;
-  onClose: () => void;
   isOpen: boolean;
   userId: string;
 };
 
-const SearchChannelScheme = z.array(
-  z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    ownerId: z.string().uuid(),
-    image: z.string().url(),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
-    access: z.union([
-      z.literal("PROTECTED"),
-      z.literal("PRIVATE"),
-      z.literal("PUBLIC"),
-    ]),
-  })
-);
-
 export function SearchChannelsModal({
   isOpen,
   userId,
-  onClose,
   onOpenChange,
 }: SearchChannelsModalProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery] = useDebounce(query, 500);
+  const queryClient = useQueryClient();
 
   const {
     isLoading,
     isError,
     isSuccess,
     data: channels,
-  } = useQuery(["searchChannels", debouncedQuery], async () => {
-    const { data } = await api.get("/channels/search", {
-      params: { q: debouncedQuery, userId },
-    });
-    return SearchChannelScheme.parse(data);
+  } = useQuery(["searchChannels", debouncedQuery], () =>
+    searchChannels({ query: debouncedQuery, userId })
+  );
+
+  const joinMutation = useMutation(joinChannel, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("searchChannels");
+      queryClient.invalidateQueries("channels");
+    },
   });
 
+  function handleOpenChange(isOpen: boolean) {
+    onOpenChange(isOpen);
+    if (!isOpen) {
+      setQuery("");
+    }
+  }
+
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={handleOpenChange}
+      isDismissable={false}
+    >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
           Search for channels
@@ -83,27 +78,14 @@ export function SearchChannelsModal({
               />
             )}
             {isSuccess && channels.length > 0 && (
-              <div className="w-full flex-1">
+              <div className="flex flex-col gap-[8px] w-full flex-1">
                 {channels.map((channel) => (
-                  <div
+                  <SearchChannelItem
                     key={channel.id}
-                    className="flex flex-row w-full gap-[8px] p-[8px] items-center rounded-[8px] border-[1px] border-black"
-                  >
-                    <Avatar src={channel.image} size="md" />
-                    <div className="flex flex-col flex-1 overflow-auto">
-                      <p>
-                        {channel.name}{" "}
-                        {channel.access === "PROTECTED" && (
-                          <span className="bg-red-100 font-bold rounded text-[12px] p-[4px]">
-                            protected
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <Button size="sm" color="primary">
-                      Join
-                    </Button>
-                  </div>
+                    joinChannel={joinMutation.mutate}
+                    channel={channel}
+                    userId={userId}
+                  />
                 ))}
               </div>
             )}
