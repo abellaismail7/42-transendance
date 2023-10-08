@@ -174,7 +174,7 @@ pub fn setup(
 
 /// set up a simple 3D scene with text
 fn get_text_mesh(text: &str, text_size: f32) -> (Mesh, f32) {
-    let font_data = include_bytes!("../../../../assets/fonts/RenegadePursuit.ttf");
+    let font_data = include_bytes!("../../assets/fonts/RenegadePursuit.ttf");
     let mut generator = MeshGenerator::new(font_data);
     let text_mesh: MeshText = generator
         .generate_section(text, false, Some(&Mat4::from_scale(Vec3::splat(text_size)).to_cols_array()))

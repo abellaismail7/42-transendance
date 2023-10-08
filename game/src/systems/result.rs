@@ -6,7 +6,7 @@ use meshtext::{MeshGenerator, MeshText, TextSection};
 use crate::components::{text_result::{ScoreboardText, ScoreEvent}, scoreboard::Scoreboard, paddle::PaddleSide};
 
 
-static FONT_BYTES: &[u8] = include_bytes!("../../../../assets/fonts/RenegadePursuit.ttf");
+static FONT_BYTES: &[u8] = include_bytes!("../../assets/fonts/RenegadePursuit.ttf");
 // static GENERATOR:MeshGenerator<Face<'_>> = ;
 
 pub fn update_result(
