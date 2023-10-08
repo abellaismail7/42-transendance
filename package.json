@@ -5,7 +5,8 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "turbo": "turbo",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "game:build": "wasm-pack build game --out-dir ../pkg"
   },
   "devDependencies": {
     "@turbo/gen": "^1.9.7",
