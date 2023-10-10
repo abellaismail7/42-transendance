@@ -9,11 +9,11 @@
     "game:build": "wasm-pack build game --out-dir ../pkg"
   },
   "devDependencies": {
-    "@turbo/gen": "^1.9.7",
+    "@turbo/gen": "^1.10.14",
     "@types/cookie-parser": "^1.4.4",
     "eslint": "^7.32.0",
     "eslint-config-custom": "workspace:*",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "turbo": "latest"
   },
   "packageManager": "pnpm@8.6.10",

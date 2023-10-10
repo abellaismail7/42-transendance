@@ -11,10 +11,11 @@ model User {
   id               String           @id @unique @default(uuid())
   username         String
   login            String           @unique
-  email            String           @unique
   state            UserState        @default(OFFLINE)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+  email            String           @unique
+  image            String
   ownedChannels    Channel[]
   channels         ChannelMember[]
   channelsMessages ChannelMessage[]
@@ -28,6 +29,7 @@ model Channel {
   password  String?
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  image     String
   owner     User             @relation(fields: [ownerId], references: [id])
   members   ChannelMember[]
   messages  ChannelMessage[]
@@ -52,6 +54,7 @@ model ChannelMessage {
   channelId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  content   String
   channel   Channel  @relation(fields: [channelId], references: [id])
   sender    User     @relation(fields: [senderId], references: [id])
 }
