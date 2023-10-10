@@ -2,7 +2,7 @@ import { ChannelMembers } from "./_channel_members/ChannelMembers";
 import { ChannelMemberDto } from "./_channel_members/ChannelMemberDto";
 import { ChatSpace } from "./_chat_space/ChatSpace";
 import { ChannelDto } from "./_channels/ChannelDto";
-import { Channels } from "./_channels/Channels";
+import { SideNavigation } from "./_channels/Channels";
 import { useQueryClient } from "react-query";
 import { useEffect, useState } from "react";
 import { socket } from "./globals";
@@ -114,7 +114,7 @@ export default function Chat() {
     <div className="flex h-[100dvh] w-fill p-[24px] gap-[24px]">
       {userId !== null ? (
         <>
-          <Channels
+          <SideNavigation
             onChannelSelected={(channel) => {
               if (selectedChannel?.id !== channel.id) {
                 setSelectedChannel(channel);
