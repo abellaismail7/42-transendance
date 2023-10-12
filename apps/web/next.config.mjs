@@ -14,18 +14,6 @@ const config = {
     config.experiments = { asyncWebAssembly: true };
     return config;
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "placebeard.it",
-      },
-      {
-        protocol: "https",
-        hostname: "placehold.co",
-      },
-    ],
-  }
 };
 
 export default config;

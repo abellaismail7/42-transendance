@@ -9,7 +9,10 @@ export default function LandingPage() {
     try {
       wasm.run_bevy();
     } catch (error) {
-      if (!error.message.startsWith("Using exceptions for control flow,"))
+      if (
+        !(error instanceof Error) ||
+        !error.message.startsWith("Using exceptions for control flow,")
+      )
         throw error;
     }
     //wasm.run_bevy();
