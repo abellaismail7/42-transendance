@@ -2,6 +2,7 @@ import { CreateChannelDto } from './dto/create-channel.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { JoinChannelDto } from './dto/join-channel.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MinioService } from 'src/minio/minio.service';
 import { hash, compare } from 'bcrypt';
 
 import {
@@ -13,7 +14,10 @@ import {
 
 @Injectable()
 export class ChannelsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly minio: MinioService,
+  ) {}
 
   // TODO(saidooubella): marked for removal after using it for testing
   delay(timeout: number) {
@@ -59,23 +63,43 @@ export class ChannelsService {
     });
   }
 
-  async createChannel(props: CreateChannelDto & { image: string }) {
-    await this.asssertUserExists(props.ownerId);
+  async createChannel({
+    name,
+    access,
+    ownerId,
+    password,
+    image,
+  }: CreateChannelDto & { image: Buffer | null }) {
+    await this.asssertUserExists(ownerId);
 
-    return await this.prisma.channel.create({
+    let imageUrl = 'http://localhost:9000/avatars/channel_default.png';
+
+    const channel = await this.prisma.channel.create({
       data: {
-        ...props,
-        password:
-          props.password !== undefined ? await hash(props.password, 10) : null,
+        name,
+        access,
+        ownerId,
+        image: imageUrl,
+        password: password !== undefined ? await hash(password, 10) : null,
         members: {
           create: {
-            userId: props.ownerId,
+            userId: ownerId,
             isAdmin: true,
             joinStatus: 'JOINED',
           },
         },
       },
     });
+
+    if (image) {
+      await this.minio.writeAvatar(channel.id, image);
+      return await this.prisma.channel.update({
+        where: { id: channel.id },
+        data: { image: 'http://localhost:9000/avatars/' + channel.id },
+      });
+    }
+
+    return channel;
   }
 
   async joinChannel({ channelId, userId, password }: JoinChannelDto) {

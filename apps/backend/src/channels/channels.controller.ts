@@ -1,5 +1,6 @@
 import { JoinChannelDto, JoinChannelScheme } from './dto/join-channel.dto';
 import { SendMessageDto, SendMessageScheme } from './dto/send-message.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ZodValidationPipe } from 'src/zod/zod.validator';
 import { ChannelsService } from './channels.service';
 
@@ -23,21 +24,12 @@ import {
   CreateChannelScheme,
 } from './dto/create-channel.dto';
 
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-
 @Controller('channels')
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
 
   @Post('create')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './avatars/',
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('image'))
   createChannel(
     @Body(new ZodValidationPipe(CreateChannelScheme))
     createChannelDto: CreateChannelDto,
@@ -51,9 +43,7 @@ export class ChannelsController {
   ) {
     return this.channelsService.createChannel({
       ...createChannelDto,
-      image: file
-        ? `http://localhost:4000/${file.path}`
-        : 'https://placehold.co/400', // TODO(saidooubella): Need to be changed with a more bette alternative
+      image: file?.buffer ?? null,
     });
   }
 
