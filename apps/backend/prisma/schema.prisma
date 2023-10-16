@@ -8,44 +8,45 @@ datasource db {
 }
 
 model User {
-  id               String           @id @unique @default(uuid())
-  username         String
-  login            String           @unique
-  state            UserState        @default(OFFLINE)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  email            String           @unique
-  image            String
-  ownedChannels    Channel[]
-  channels         ChannelMember[]
-  channelsMessages ChannelMessage[]
+  id                  String              @id @unique @default(uuid())
+  username            String
+  login               String              @unique
+  state               UserState           @default(OFFLINE)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  email               String              @unique
+  image               String
+  ownedChannels       Channel[]
+  channelsInvitaitons ChannelInvitation[]
+  channelsMessages    ChannelMessage[]
+  channels            ChannelMember[]
 }
 
 model Channel {
-  id        String           @id @unique @default(uuid())
-  name      String
-  ownerId   String
-  access    ChannelAccess
-  password  String?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  image     String
-  owner     User             @relation(fields: [ownerId], references: [id])
-  members   ChannelMember[]
-  messages  ChannelMessage[]
+  id              String              @id @unique @default(uuid())
+  name            String
+  ownerId         String
+  access          ChannelAccess
+  password        String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  image           String
+  owner           User                @relation(fields: [ownerId], references: [id])
+  sentInvitations ChannelInvitation[]
+  members         ChannelMember[]
+  messages        ChannelMessage[]
 }
 
 model ChannelMember {
-  id           String     @id @unique @default(uuid())
+  id           String  @id @unique @default(uuid())
   userId       String
   channelId    String
   isAdmin      Boolean
-  isBanned     Boolean    @default(false)
-  isMuted      Boolean    @default(false)
-  joinStatus   JoinStatus
+  isBanned     Boolean @default(false)
+  isMuted      Boolean @default(false)
   muteDuration Int?
-  channel      Channel    @relation(fields: [channelId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
+  channel      Channel @relation(fields: [channelId], references: [id])
+  user         User    @relation(fields: [userId], references: [id])
 }
 
 model ChannelMessage {
@@ -59,9 +60,14 @@ model ChannelMessage {
   sender    User     @relation(fields: [senderId], references: [id])
 }
 
-enum JoinStatus {
-  WAIT_FOR_APPROVAL
-  JOINED
+model ChannelInvitation {
+  id         String   @id @unique @default(uuid())
+  channelId  String
+  receiverId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  channel    Channel  @relation(fields: [channelId], references: [id])
+  receiver   User     @relation(fields: [receiverId], references: [id])
 }
 
 enum ChannelAccess {

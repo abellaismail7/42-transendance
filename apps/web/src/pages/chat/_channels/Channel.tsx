@@ -31,11 +31,6 @@ export function Channel({ channel, onClick, isSelected }: ChannelProps) {
           {channel.lastMessage}
         </p>
       </div>
-      {channel.joinStatus === "WAIT_FOR_APPROVAL" && (
-        <Chip className="text-[12px]" color="primary" variant="flat">
-          Waiting for approval...
-        </Chip>
-      )}
     </div>
   );
 }

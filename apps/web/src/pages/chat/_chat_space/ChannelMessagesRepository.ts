@@ -21,6 +21,8 @@ const MessageScheme = z.array(
   })
 );
 
+export type MessageDto = z.infer<typeof MessageScheme>[number];
+
 export function useChannelMessages(userId: string, channelId: string) {
   return useQuery(["messages", channelId], async () => {
     const { data } = await api.get("/channels/messages", {

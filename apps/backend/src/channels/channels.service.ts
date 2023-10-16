@@ -1,6 +1,7 @@
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { JoinChannelDto } from './dto/join-channel.dto';
+import { InviteUserDto } from './dto/invite-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MinioService } from 'src/minio/minio.service';
 import { hash, compare } from 'bcrypt';
@@ -24,11 +25,87 @@ export class ChannelsService {
     return new Promise((resolve) => setTimeout(resolve, timeout));
   }
 
+  async rejectInvitation(invitationId: string) {
+    await this.prisma.channelInvitation.delete({
+      where: { id: invitationId },
+    });
+  }
+
+  async acceptInvitation(invitationId: string) {
+    const invitation = await this.prisma.channelInvitation.delete({
+      where: { id: invitationId },
+    });
+
+    await this.asssertChannelExists(invitation.channelId);
+    await this.asssertUserExists(invitation.receiverId);
+
+    await this.prisma.channelMember.create({
+      data: {
+        channelId: invitation.channelId,
+        userId: invitation.receiverId,
+        isAdmin: false,
+      },
+    });
+  }
+
+  async findInvitations(userId: string) {
+    await this.asssertUserExists(userId);
+
+    return this.prisma.channelInvitation.findMany({
+      where: { receiverId: userId },
+      include: { channel: { select: { name: true, image: true } } },
+    });
+  }
+
+  async inviteUser(inviteUserDto: InviteUserDto) {
+    await this.asssertChannelExists(inviteUserDto.channelId);
+    await this.asssertUserExists(inviteUserDto.receiverId);
+
+    const hasUser = await this.prisma.channelMember.count({
+      where: {
+        channelId: inviteUserDto.channelId,
+        userId: inviteUserDto.receiverId,
+      },
+    });
+
+    if (hasUser > 0) {
+      throw new BadRequestException('The user is already a member');
+    }
+
+    return this.prisma.channelInvitation.create({
+      data: inviteUserDto,
+    });
+  }
+
+  async findInvitableUsersFor(channelId: string, query: string) {
+    await this.asssertChannelExists(channelId);
+
+    return await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: query, mode: 'insensitive' } },
+          { login: { contains: query, mode: 'insensitive' } },
+        ],
+        channelsInvitaitons: { none: { channelId } },
+        channels: { none: { channelId } },
+      },
+      select: {
+        id: true,
+        username: true,
+        login: true,
+        email: true,
+        image: true,
+      },
+    });
+  }
+
   async searchChannels(userId: string, query: string) {
+    await this.asssertUserExists(userId);
+
     return await this.prisma.channel.findMany({
       where: {
         access: { in: ['PUBLIC', 'PROTECTED'] },
-        name: { contains: query },
+        name: { contains: query, mode: 'insensitive' },
         members: { none: { userId } },
       },
       select: {
@@ -43,9 +120,11 @@ export class ChannelsService {
     });
   }
 
-  findMembers(channelId: string) {
-    return this.prisma.channelMember.findMany({
-      where: { channelId, joinStatus: 'JOINED', isBanned: false },
+  async findMembers(channelId: string) {
+    await this.asssertChannelExists(channelId);
+
+    return await this.prisma.channelMember.findMany({
+      where: { channelId, isBanned: false },
       select: {
         isAdmin: true,
         isMuted: true,
@@ -72,7 +151,7 @@ export class ChannelsService {
   }: CreateChannelDto & { image: Buffer | null }) {
     await this.asssertUserExists(ownerId);
 
-    let imageUrl = 'http://localhost:9000/avatars/channel_default.png';
+    const imageUrl = 'http://localhost:9000/avatars/channel_default.png';
 
     const channel = await this.prisma.channel.create({
       data: {
@@ -85,17 +164,18 @@ export class ChannelsService {
           create: {
             userId: ownerId,
             isAdmin: true,
-            joinStatus: 'JOINED',
           },
         },
       },
     });
 
     if (image) {
-      await this.minio.writeAvatar(channel.id, image);
+      const imageName = 'channel_' + channel.id;
+      await this.minio.writeAvatar(imageName, image);
+
       return await this.prisma.channel.update({
         where: { id: channel.id },
-        data: { image: 'http://localhost:9000/avatars/' + channel.id },
+        data: { image: 'http://localhost:9000/avatars/' + imageName },
       });
     }
 
@@ -125,15 +205,9 @@ export class ChannelsService {
 
     switch (channel.access) {
       case 'PRIVATE':
-        await this.prisma.channelMember.create({
-          data: {
-            channelId,
-            userId,
-            isAdmin: false,
-            joinStatus: 'WAIT_FOR_APPROVAL',
-          },
-        });
-        break;
+        throw new ForbiddenException(
+          'Private channels can only be joined through invitations',
+        );
       case 'PROTECTED':
         if (!(await compare(password!, channel.password!))) {
           throw new ForbiddenException('Invalid channel password');
@@ -144,7 +218,6 @@ export class ChannelsService {
             channelId,
             userId,
             isAdmin: false,
-            joinStatus: 'JOINED',
           },
         });
         break;
@@ -153,9 +226,11 @@ export class ChannelsService {
 
   async findChannelsFor(userId: string) {
     await this.asssertUserExists(userId);
+
     const channels = await this.prisma.channel.findMany({
       where: { members: { some: { userId } } },
     });
+
     const res = await Promise.all(
       channels.map(async (channel) => {
         const lastMessage = await this.prisma.channelMessage.findFirst({
@@ -163,24 +238,18 @@ export class ChannelsService {
           orderBy: { createdAt: 'desc' },
         });
 
-        const member = await this.prisma.channelMember.findFirst({
-          where: { channelId: channel.id, userId },
-        });
-
         const lastMessageContent =
-          member?.joinStatus === 'JOINED'
-            ? lastMessage?.content ?? 'There are no messages'
-            : null;
+          lastMessage?.content ?? 'There are no messages';
 
         return {
           id: channel.id,
           name: channel.name,
           image: channel.image,
           lastMessage: lastMessageContent,
-          joinStatus: member!.joinStatus,
         };
       }),
     );
+
     return res;
   }
 
@@ -211,7 +280,7 @@ export class ChannelsService {
       sendMessageDto.senderId,
     );
     return this.prisma.channelMessage.create({
-      data: { ...sendMessageDto },
+      data: sendMessageDto,
     });
   }
 

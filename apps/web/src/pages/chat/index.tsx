@@ -124,17 +124,7 @@ export default function Chat() {
             isSelected={(channel) => selectedChannel?.id === channel.id}
             userId={userId}
           />
-          <ChatSpace
-            channel={selectedChannel}
-            userId={userId}
-            onSend={(channelId, content) => {
-              socket.emit("send_channel_message", {
-                content,
-                channelId,
-                senderId: userId,
-              });
-            }}
-          />
+          <ChatSpace channel={selectedChannel} userId={userId} />
           {selectedChannel &&
             (selectedMember !== null ? (
               <ChannelMemberDetails

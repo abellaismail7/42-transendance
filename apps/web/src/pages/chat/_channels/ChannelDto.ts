@@ -6,7 +6,6 @@ export const ChannelsScheme = z.array(
     name: z.string(),
     image: z.string().url(),
     lastMessage: z.string().nullable(),
-    joinStatus: z.union([z.literal("WAIT_FOR_APPROVAL"), z.literal("JOINED")]),
   })
 );
 
