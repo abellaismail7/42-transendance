@@ -4,6 +4,7 @@ import type { NextPage } from "next";
 
 import { QueryClient, QueryClientProvider } from "react-query";
 import { NextUIProvider } from "@nextui-org/react";
+import { SocketProvider } from "./SocketContext";
 import { Inter } from "next/font/google";
 
 import "~/styles/globals.css";
@@ -28,17 +29,17 @@ const queryClient = new QueryClient({
   },
 });
 
-function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
   return (
     <NextUIProvider>
       <QueryClientProvider client={queryClient}>
-        <div className={inter.className}>
-          {getLayout(<Component {...pageProps} />)}
-        </div>
+        <SocketProvider>
+          <div className={inter.className}>
+            {getLayout(<Component {...pageProps} />)}
+          </div>
+        </SocketProvider>
       </QueryClientProvider>
     </NextUIProvider>
   );
 }
-
-export default MyApp;

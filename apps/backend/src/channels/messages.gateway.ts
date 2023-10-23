@@ -1,6 +1,7 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -16,9 +17,13 @@ const api = axios.create({ baseURL: 'http://localhost:4000' });
 @WebSocketGateway({
   cors: { origin: 'http://localhost:3000' },
 })
-export class ChannelsMessagesGateway {
+export class ChannelsMessagesGateway implements OnGatewayConnection {
   @WebSocketServer()
   server!: Server;
+
+  handleConnection(client: any, ...args: any[]) {
+    console.log('new server socket connection');
+  }
 
   @SubscribeMessage('join_channel')
   handleJoinChannel(

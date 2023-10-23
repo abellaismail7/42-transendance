@@ -5,7 +5,7 @@ import { MessageInput } from "./MessageInput";
 import { MessagesBox } from "./MessagesBox";
 import { useDebounce } from "use-debounce";
 import { ChannelDto } from "../_channels/ChannelDto";
-import { api, socket } from "../globals";
+import { api } from "../globals";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { z } from "zod";
 
@@ -23,6 +23,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
+import { useSocket } from "~/pages/SocketContext";
 
 type InvitationModalProps = {
   isOpen: boolean;
@@ -134,6 +135,8 @@ export type MessagesProps = {
 };
 
 export function Messages({ userId, channel }: MessagesProps) {
+  const socket = useSocket();
+
   const {
     isError,
     isSuccess,

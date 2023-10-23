@@ -5,7 +5,6 @@ import { ChannelDto } from "./_channels/ChannelDto";
 import { SideNavigation } from "./_channels/Channels";
 import { useQueryClient } from "react-query";
 import { useEffect, useState } from "react";
-import { socket } from "./globals";
 import { X } from "lucide-react";
 
 import {
@@ -18,6 +17,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@nextui-org/react";
+import { useSocket } from "../SocketContext";
 
 // TODO(saidooubella): To be deleted once authentication is ready for integration.
 function UserIdPrompt({ setUserId }: { setUserId: (userId: string) => void }) {
@@ -98,6 +98,7 @@ export default function Chat() {
   );
   const [userId, setUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const socket = useSocket();
 
   useEffect(() => {
     const callback = () => {
