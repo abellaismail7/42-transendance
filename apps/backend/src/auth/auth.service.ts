@@ -1,11 +1,14 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Request, Response } from 'express';
 import * as cookieParser from 'cookie-parser'
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly jwtService: JwtService) {}
+
   login(res: Response) {
     //if (request.cookies)
     res.cookie('token', 'valid_token', {
