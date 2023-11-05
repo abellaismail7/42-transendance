@@ -1,8 +1,8 @@
 import { Box } from "./box";
 import { config } from "~/game/config";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import { add_in } from "~/utils/math";
+import { useEffect, useRef } from "react";
+import { socket } from "~/pages/chat/globals";
 
 type PaddleProps = {
   down?: number;
@@ -10,22 +10,19 @@ type PaddleProps = {
 
 export const Paddle = ({ down }: PaddleProps) => {
   const meshLeft = useRef<THREE.Mesh>(null!);
+
+  useEffect(() => {
+    socket.emit("startGame");
+    socket.on("movePaddle", (data) => {
+      meshLeft.current.position.y = data.leftY;
+    });
+  }, []);
+
   useFrame(() => {
     if (meshLeft.current && down) {
-      if (down === 1)
-        meshLeft.current.position.y = add_in(
-          meshLeft.current.position.y,
-          0.4,
-          -11,
-          3,
-        );
-      if (down === 2)
-        meshLeft.current.position.y = add_in(
-          meshLeft.current.position.y,
-          -0.4,
-          -11,
-          3,
-        );
+      socket.emit("movePaddle", {
+        dir: down,
+      });
     }
   });
   return (

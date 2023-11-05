@@ -1,14 +1,17 @@
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import { RootLayout } from "ui";
+import { Ball } from "~/components/ball";
 import { Box } from "~/components/box";
 import { Paddle } from "~/components/paddle";
 import { KeyRecorder } from "~/components/recorder";
 import { config } from "~/game/config";
+import { useWidth } from "~/hooks/width";
 
 export default function LandingPage() {
   const ref = useRef(false);
   const [down, setDown] = useState(0);
+  const width = useWidth();
 
   //const [up, setUp] = useRef(false);
   useEffect(() => {
@@ -44,6 +47,9 @@ export default function LandingPage() {
           {/* PADDLES */}
           <Paddle down={down} />
           {/* END PADDLES */}
+          {/* BALL */}
+          <Ball />
+          {/* END BALL */}
 
           <Box
             mmaterial={{
