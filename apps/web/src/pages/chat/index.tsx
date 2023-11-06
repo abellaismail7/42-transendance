@@ -91,10 +91,10 @@ function ChannelMemberDetails({ member, onClose }: ChannelMemberDetailsProps) {
 
 export default function Chat() {
   const [selectedChannel, setSelectedChannel] = useState<ChannelDto | null>(
-    null
+    null,
   );
   const [selectedMember, setSelectedMember] = useState<ChannelMemberDto | null>(
-    null
+    null,
   );
   const [userId, setUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();

@@ -24,6 +24,14 @@ export function Vec(x = 0, y = 0, z = 0) {
       return res;
     },
 
+    div: function (num: number) {
+      const res = Vec();
+      res.x = this.x / num;
+      res.y = this.y / num;
+      res.z = this.z / num;
+      return res;
+    },
+
     cross: function (to: Vec3Type) {
       const res = Vec();
       res.x = this.y * to.z - this.z * to.y;
@@ -43,6 +51,15 @@ export function Vec(x = 0, y = 0, z = 0) {
       res.y = this.y - 2 * dot * n.y;
       res.z = this.z - 2 * dot * n.z;
       return res;
+    },
+
+    mag: function () {
+      return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    },
+
+    norm: function () {
+      const mag = this.mag();
+      return this.div(mag);
     },
 
     pure: function () {

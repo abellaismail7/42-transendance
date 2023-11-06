@@ -35,12 +35,12 @@ export class GameGateway {
     setInterval(() => {
       const ball = this.gameService.updateBall();
       this.server.emit('moveBall', ball);
-    }, 10);
+    }, 1000 / 24);
   }
 
-  @SubscribeMessage('updateGame')
-  update(@MessageBody() updateGameDto: UpdateGameDto) {
-    return this.gameService.update(updateGameDto.id, updateGameDto);
+  @SubscribeMessage('debug')
+  update() {
+    return this.gameService.debug();
   }
 
   @SubscribeMessage('removeGame')
