@@ -4,18 +4,29 @@ import { AuthController } from './auth.controller';
 import * as cookieParser from 'cookie-parser';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from 'src/user/user.service';
+import { LocalStrategy } from './strategies/local.strategy';
+import { FortyTwoStrategy } from './strategies/42.strategy';
 
 @Module({
   imports: [
-    PassportModule,
+    PassportModule.register({ defaultStrategy: '42' }),
     JwtModule.register({
       secret: 'PASSWORD',
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  controllers: [AuthController, JwtStrategy],
-  providers: [AuthService],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    PrismaService,
+    UserService,
+    JwtStrategy,
+    LocalStrategy,
+    FortyTwoStrategy,
+  ],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {

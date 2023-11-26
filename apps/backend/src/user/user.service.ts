@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDtoType } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { JwtService } from '@nestjs/jwt';
+import { authenticator } from 'otplib';
 
 @Injectable()
 export class UserService {
@@ -20,18 +20,44 @@ export class UserService {
     return users;
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOneById(id: string): Promise<User | null> {
     const user: User | null = await this.prisma.user.findUnique({
       where: { id },
     });
+    return user;
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user: User | null = await this.prisma.user.findUnique({
+      where: { email },
+    });
     if (!user) {
-      throw new Error(`User with id ${id} not found`);
+      return null;
     }
     return user;
   }
 
+  async fulfillTfa(id: string, tfaCode: string): Promise<User> {
+    const user = await this.findOneById(id);
+    if (user) {
+      if (process.env.TWOFA_SECRET === undefined) {
+        throw new Error('TFA secret not found');
+      }
+      const isTfaValid = authenticator.check(tfaCode, process.env.TWOFA_SECRET);
+      if (isTfaValid) {
+        const updatedUser: User = await this.prisma.user.update({
+          where: { id },
+          data: { TwoFAcode: tfaCode },
+        });
+        return updatedUser;
+      }
+      throw new Error('Invalid TFA code');
+    }
+    throw new Error(`User with id ${id} not found`);
+  }
+
   async update(id: string, updateUserDto: UpdateUserDtoType): Promise<User> {
-    const user: User = await this.findOne(id);
+    const user = await this.findOneById(id);
     if (user) {
       const updatedUser: User = await this.prisma.user.update({
         where: { id },
@@ -43,7 +69,7 @@ export class UserService {
   }
 
   async remove(id: string): Promise<void> {
-    const user: User = await this.findOne(id);
+    const user = await this.findOneById(id);
     if (user) {
       await this.prisma.user.delete({
         where: { id },

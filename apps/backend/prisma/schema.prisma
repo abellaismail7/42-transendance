@@ -9,13 +9,16 @@ datasource db {
 
 model User {
   id               String           @id @unique @default(uuid())
+  name             String
   username         String
   login            String           @unique
   state            UserState        @default(OFFLINE)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   email            String           @unique
+  password         String?
   image            String
+  TwoFAcode        String?
   ownedChannels    Channel[]
   channels         ChannelMember[]
   channelsMessages ChannelMessage[]
