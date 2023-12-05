@@ -40,7 +40,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Request() req,
   ) {
-    return this.authService.login(res, req.user, body.tfa);
+    return this.authService.login(res, req.user, body.code);
   }
 
   @UseGuards(JwtAuthGuard)

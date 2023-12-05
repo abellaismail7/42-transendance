@@ -40,10 +40,10 @@ export class UserService {
   async fulfillTfa(id: string, tfaCode: string): Promise<User> {
     const user = await this.findOneById(id);
     if (user) {
-      if (process.env.TWOFA_SECRET === undefined) {
+      if (process.env.TWOFA_KEY === undefined) {
         throw new Error('TFA secret not found');
       }
-      const isTfaValid = authenticator.check(tfaCode, process.env.TWOFA_SECRET);
+      const isTfaValid = authenticator.check(tfaCode, process.env.TWOFA_KEY);
       if (isTfaValid) {
         const updatedUser: User = await this.prisma.user.update({
           where: { id },

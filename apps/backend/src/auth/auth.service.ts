@@ -43,10 +43,10 @@ export class AuthService {
   async waitTfa(res: Response, user: User) {
     //sign the token that we have before the tfa
     const payload = { id: user.id, username: user.username };
-    const token = this.jwtService.sign(payload);
+    const token1 = this.jwtService.sign(payload);
     console.log('waitTfa');
     res
-      .cookie('token', token, {
+      .cookie('token1', token1, {
         httpOnly: true,
         secure: false,
         maxAge: 24 * 3600000,
@@ -64,12 +64,13 @@ export class AuthService {
 
   async login(res: Response, user: User, tfaCode: string) {
     if (tfaCode) {
-      this.userService.fulfillTfa(user.id, tfaCode);
+      console.log('tfacode', tfaCode);
+      user = await this.userService.fulfillTfa(user.id, tfaCode);
     }
     //const payload = { id: user.id, username: user.username };
-    const token = this.jwtService.sign(user);
-    console.log('login');
-    res.cookie('token', token, {
+    const token2 = this.jwtService.sign(user);
+    console.log('login here');
+    res.cookie('token2', token2, {
       httpOnly: true,
       secure: false,
       maxAge: 24 * 3600000,
